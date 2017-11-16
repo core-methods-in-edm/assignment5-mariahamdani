@@ -16,7 +16,8 @@ library(party)
 
 ## Part I
 ```{r}
-D1 <- 
+D1 <- data.frame(intelligent_tutor)
+
 ```
 
 ##Classification Tree
@@ -60,13 +61,15 @@ plot(score_ctree)
 
 Please interpret the tree, which two behaviors do you think the teacher should most closely pay attemtion to?
 
+#The teacher should pay close attention to the students that request more than 12 hints and/or the students that have a prior % correct of less than or equal to 63%. In general, the greater the number of hints and the lower the prior % correct, the more intervention the student will need.
+
 #Test Tree
 Upload the data "intelligent_tutor_new.csv". This is a data set of a differnt sample of students doing the same problems in the same system. We can use the tree we built for the previous data set to try to predict the "advice" we should give the teacher about these new students. 
 
 ```{r}
 #Upload new data
 
-D2 <- 
+D2 <- data.frame(intelligent_tutor_new)
 
 #Generate predicted advice for new students based on tree generated from old students
 
@@ -74,4 +77,26 @@ D2$prediction <- predict(score_ctree, D2)
 
 ``` 
 ## Part III
-Compare the predicted advice with the actual advice that these studnts recieved. What is the difference between the observed and predicted results?
+Compare the predicted advice with the actual advice that these students recieved. What is the difference between the observed and predicted results?
+
+#The prediction model has students going through intervention and monitoring that actually don't need it. If they all scored 100%, then no action is needed. This could actually waste time students that don't need any action whatsover. On the other hand, looking at the data of prior % correct, # of prior questions answered and # of hints given, it doesn't seem likely that all of these students would then make 100% on the test. They obviously have different levels of ability. So perhaps the test was faulty? Seems there is more than meets the data here. 
+
+```{r}
+D2$advice <- ifelse(D2$score <=0.4, "intervene", ifelse(D2$score > 0.4 & D2$score <=0.8, "monitor", "no action"))
+
+
+#We'd use this if we trusted the conclusions we made in part II: (but we don't :))
+#D2$advice <- ifelse(D2$hints > 12, "intervene", ifelse(D2$hints < 8 & D2$hints > 12, "monitor", "no action"))
+
+
+#D2$advice2 <- ifelse(D2$prior_percent_correct <= 0.6, "intervene", ifelse(D2$prior_percent_correct > 0.6 & D2$prior_percent_correct <=0.8, "monitor", "no action"))
+
+score_ctree <- ctree(factor(prediction))
+
+# this is not working well :( Gives solid boxes. No bueno. - Actaully it's bueno. it's fine, they all made 100%.
+
+score_ctree <- ctree(factor(prediction) ~ prior_prob_count + prior_percent_correct + hints, D2)
+
+plot(score_ctree)
+```
+
